@@ -99,6 +99,11 @@ export const handleGitHubCallback: RequestHandler = async (request, response, ne
       (await accessTokenResponse.json()) as GitHubAccessTokenResponse;
 
     if (!accessTokenResponse.ok || !accessTokenPayload.access_token) {
+      console.error("GitHub OAuth token exchange failed.", {
+        status: accessTokenResponse.status,
+        error: accessTokenPayload.error,
+        description: accessTokenPayload.error_description,
+      });
       response.status(502).json({ message: "GitHub token exchange failed." });
       return;
     }
@@ -113,6 +118,9 @@ export const handleGitHubCallback: RequestHandler = async (request, response, ne
     });
 
     if (!profileResponse.ok) {
+      console.error("GitHub OAuth profile request failed.", {
+        status: profileResponse.status,
+      });
       response.status(502).json({ message: "GitHub profile request failed." });
       return;
     }
