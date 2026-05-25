@@ -57,14 +57,14 @@ export function AppShell() {
   };
 
   const navigation = (onNavigate?: () => void) => (
-    <nav aria-label="Application sections" className="grid gap-xs px-md py-xl">
+    <nav aria-label="Application sections" className="grid gap-sm px-md py-xl">
       {navigationItems.map(({ icon: Icon, ...item }) => (
         <NavLink
           className={({ isActive }) =>
-            `flex items-center gap-md border-l-2 px-md py-sm text-body-md transition-colors ${
+            `flex items-center gap-md border-l-4 px-md py-sm text-body-md rounded-none transition-all duration-300 ${
               isActive
-                ? "border-primary-container bg-primary-container/10 text-on-surface"
-                : "border-transparent text-outline hover:border-outline-variant hover:text-secondary"
+                ? "border-primary bg-gradient-to-r from-primary/15 to-transparent text-on-surface shadow-sm shadow-primary/5 font-semibold"
+                : "border-transparent text-secondary hover:text-on-surface hover:bg-white/5 hover:translate-x-[2px]"
             }`
           }
           end={item.end}
@@ -72,7 +72,7 @@ export function AppShell() {
           onClick={onNavigate}
           to={item.to}
         >
-          <Icon aria-hidden={true} className="shrink-0" size={18} />
+          <Icon aria-hidden={true} className="shrink-0 transition-transform duration-300 group-hover:scale-110" size={18} />
           {item.label}
         </NavLink>
       ))}
@@ -80,11 +80,16 @@ export function AppShell() {
   );
 
   const accountPanel = (
-    <div className="mt-auto border-t border-structure p-lg">
+    <div className="mt-auto border-t border-structure p-lg bg-surface-container-low/20">
       <p className="label-caps mb-sm">SIGNED IN</p>
-      <p className="mb-md truncate font-mono text-code-sm text-secondary">
-        {user?.username ?? "GitHub User"}
-      </p>
+      <div className="flex items-center gap-md mb-md">
+        <div className="flex h-8 w-8 items-center justify-center rounded-none bg-gradient-to-br from-primary to-primary-container font-mono text-xs font-bold text-white shadow-md shadow-primary/20">
+          {(user?.username ?? "G").substring(0, 2).toUpperCase()}
+        </div>
+        <p className="flex-1 truncate font-mono text-code-sm text-on-surface font-semibold">
+          {user?.username ?? "GitHub User"}
+        </p>
+      </div>
       <button className="button-ghost w-full" onClick={handleLogout} type="button">
         Logout
       </button>
@@ -93,7 +98,7 @@ export function AppShell() {
 
   return (
     <div className="flex min-h-screen bg-surface">
-      <aside className="fixed inset-y-0 left-0 hidden w-sidebar flex-col border-r border-structure bg-card lg:flex">
+      <aside className="fixed inset-y-0 left-0 hidden w-sidebar flex-col border-r border-structure bg-card/90 backdrop-blur-md lg:flex">
         <div className="flex h-[72px] items-center border-b border-structure px-lg">
           <Logo />
         </div>
@@ -106,14 +111,14 @@ export function AppShell() {
         <div className="fixed inset-0 z-40 lg:hidden">
           <button
             aria-label="Close navigation menu"
-            className="absolute inset-0 border-0 bg-surface/80"
+            className="absolute inset-0 border-0 bg-surface/40 backdrop-blur-sm"
             onClick={() => setMobileNavigationOpen(false)}
             type="button"
           />
 
           <aside
             aria-label="Mobile navigation"
-            className="relative flex h-full w-sidebar max-w-[calc(100%-40px)] flex-col border-r border-structure bg-card"
+            className="relative flex h-full w-sidebar max-w-[calc(100%-40px)] flex-col border-r border-structure bg-card/95 backdrop-blur-lg"
             id="mobile-navigation"
           >
             <div className="flex h-[72px] items-center justify-between border-b border-structure px-lg">
@@ -135,7 +140,7 @@ export function AppShell() {
       )}
 
       <div className="min-w-0 flex-1 lg:pl-sidebar">
-        <header className="sticky top-0 z-20 flex h-[64px] items-center justify-between border-b border-structure bg-card px-md lg:hidden">
+        <header className="sticky top-0 z-20 flex h-[64px] items-center justify-between border-b border-structure bg-card/85 backdrop-blur-md px-md lg:hidden">
           <Logo />
           <button
             aria-controls="mobile-navigation"

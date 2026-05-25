@@ -3,12 +3,19 @@ interface LogoProps {
 }
 
 export function Logo({ compact = false }: LogoProps) {
-  return (
-    <div className="flex items-center gap-md font-mono font-bold tracking-[0.14em] text-on-surface">
-      <span className="grid h-8 w-8 place-items-center bg-primary text-on-primary-fixed">
+  if (compact) {
+    return (
+      <span className="font-mono font-extrabold text-code-md bg-gradient-to-r from-primary to-primary-container bg-clip-text text-transparent select-none cursor-pointer">
         P
       </span>
-      {!compact && <span className="text-code-md">PRISM</span>}
+    );
+  }
+
+  return (
+    <div className="font-mono font-extrabold tracking-[0.18em] text-on-surface cursor-pointer select-none">
+      <span className="text-code-md bg-gradient-to-r from-white via-slate-100 to-indigo-300 bg-clip-text text-transparent hover:text-white transition-colors">
+        PRISM
+      </span>
     </div>
   );
 }

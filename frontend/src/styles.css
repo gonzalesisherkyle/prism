@@ -1,24 +1,27 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap");
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --color-primary: #d0bcff;
-  --color-outline: #958ea0;
-  --color-structure: #30363d;
-  --color-card: #161b22;
+  --color-primary: #6366f1;
+  --color-outline: #475569;
+  --color-structure: #1d2c48;
+  --color-card: rgba(8, 18, 37, 0.8);
 }
 
 @layer base {
   * {
-    border-color: #30363d;
+    border-color: #1d2c48;
     box-sizing: border-box;
   }
 
   body {
     @apply m-0 min-w-[320px] bg-surface font-sans text-body-md text-on-surface antialiased;
+    background-image: radial-gradient(circle at 50% 0%, #0a142c 0%, #020813 100%);
+    background-attachment: fixed;
+    background-repeat: no-repeat;
   }
 
   #root {
@@ -37,47 +40,67 @@
 }
 
 @layer components {
+  .glass {
+    @apply bg-card/85 backdrop-blur-md border border-structure shadow-xl shadow-black/40;
+  }
+
   .label-caps {
-    @apply font-mono text-label-caps uppercase text-outline;
+    @apply font-mono text-label-caps uppercase text-outline tracking-wider;
   }
 
   .panel {
-    @apply border border-structure bg-card;
+    @apply glass rounded-none;
   }
 
   .button-primary {
-    @apply inline-flex items-center justify-center gap-sm border border-primary-container bg-primary-container px-md py-sm text-body-md font-semibold text-on-surface transition-colors hover:border-primary hover:bg-primary hover:text-on-primary;
+    @apply inline-flex items-center justify-center gap-sm border border-transparent bg-gradient-to-r from-primary to-primary-container px-md py-sm text-body-md font-semibold text-white rounded-none transition-all duration-300 shadow-lg shadow-primary/10 hover:shadow-primary/25 hover:opacity-95 hover:-translate-y-[1px] active:translate-y-[0px] disabled:opacity-50 disabled:pointer-events-none;
   }
 
   .button-ghost {
-    @apply inline-flex items-center justify-center gap-sm border border-structure bg-transparent px-md py-sm text-body-md font-semibold text-secondary transition-colors hover:border-ai-active hover:text-on-surface;
+    @apply inline-flex items-center justify-center gap-sm border border-structure bg-transparent px-md py-sm text-body-md font-semibold text-secondary rounded-none transition-all duration-300 hover:border-primary hover:text-on-surface hover:bg-surface-variant/40 hover:-translate-y-[1px] active:translate-y-[0px];
   }
 
   .button-github {
-    @apply inline-flex items-center justify-center gap-sm border border-inverse-surface bg-inverse-surface px-lg py-md text-body-md font-semibold text-inverse-on-surface transition-colors hover:border-primary hover:bg-primary;
+    @apply inline-flex items-center justify-center gap-sm border border-outline bg-white px-lg py-md text-body-md font-semibold text-neutral-900 rounded-none transition-all duration-300 hover:bg-neutral-100 hover:shadow-lg hover:shadow-white/5 hover:-translate-y-[1px] active:translate-y-[0px];
   }
 
   .field {
-    @apply w-full border border-structure bg-surface-container-lowest px-md py-sm font-mono text-code-md text-on-surface outline-none transition-colors placeholder:text-outline focus:border-primary-container;
+    @apply w-full border border-structure bg-surface-container-lowest/50 rounded-none px-md py-sm font-mono text-code-md text-on-surface outline-none transition-all placeholder:text-outline focus:border-primary focus:ring-1 focus:ring-primary;
   }
 
   .badge {
-    @apply inline-flex border px-sm py-xs font-mono text-label-caps uppercase;
+    @apply inline-flex border rounded-none px-sm py-xs font-mono text-label-caps uppercase tracking-wider font-semibold;
   }
 
   .badge-critical {
-    @apply border-error bg-error/15 text-error;
+    @apply border-error bg-error/10 text-error shadow-sm shadow-error/5;
   }
 
   .badge-warning {
-    @apply border-tertiary bg-tertiary/15 text-tertiary;
+    @apply border-tertiary bg-tertiary/10 text-tertiary shadow-sm shadow-tertiary/5;
   }
 
   .badge-success {
-    @apply border-diagnostic-success bg-diagnostic-success/15 text-diagnostic-success;
+    @apply border-diagnostic-success bg-diagnostic-success/10 text-diagnostic-success shadow-sm shadow-diagnostic-success/5;
   }
 
   .badge-suggestion {
-    @apply border-diagnostic-suggestion bg-diagnostic-suggestion/15 text-diagnostic-suggestion;
+    @apply border-diagnostic-suggestion bg-diagnostic-suggestion/10 text-diagnostic-suggestion shadow-sm shadow-diagnostic-suggestion/5;
+  }
+
+  .skeleton {
+    @apply relative overflow-hidden bg-surface-container-high/40 rounded-none;
+  }
+  .skeleton::after {
+    @apply absolute inset-0 content-[''];
+    background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.08), transparent);
+    transform: translateX(-100%);
+    animation: shimmer 1.8s infinite ease-in-out;
+  }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
   }
 }

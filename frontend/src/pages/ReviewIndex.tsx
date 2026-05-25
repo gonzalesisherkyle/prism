@@ -57,13 +57,13 @@ export function ReviewIndex() {
         <div className="grid gap-md">
           {reviews.map((review) => (
             <Link
-              className="panel flex items-center justify-between gap-md p-lg transition-colors hover:border-ai-active"
+              className="panel group flex items-center justify-between gap-md p-lg transition-all duration-300 hover:-translate-y-[2px] hover:shadow-2xl hover:shadow-primary/5 hover:border-primary/40"
               key={reviewIdentifier(review)}
               to={`/reviews/${reviewIdentifier(review)}`}
             >
               <div className="min-w-0">
-                <p className="label-caps mb-sm">{review.repoFullName}</p>
-                <p className="mb-xs truncate text-title-sm text-on-surface">{review.prTitle}</p>
+                <p className="label-caps mb-sm text-primary font-semibold tracking-wider">{review.repoFullName}</p>
+                <p className="mb-xs truncate text-title-sm text-on-surface font-semibold group-hover:text-primary transition-colors">{review.prTitle}</p>
                 <p className="font-mono text-code-sm text-outline">{formatDate(review.createdAt)}</p>
               </div>
               <ScoreBadge score={review.score} />

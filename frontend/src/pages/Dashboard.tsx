@@ -118,9 +118,10 @@ export function Dashboard() {
       />
 
       {formOpen && (
-        <form className="panel mb-xl flex flex-col gap-md p-lg sm:flex-row" onSubmit={handleRegister}>
+        <form className="panel mb-xl flex flex-col gap-md p-lg sm:flex-row border-primary/30 shadow-lg shadow-primary/5 relative overflow-hidden transition-all duration-500" onSubmit={handleRegister}>
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary via-primary-container to-transparent" />
           <label className="flex-1">
-            <span className="label-caps mb-sm block">REPOSITORY FULL NAME</span>
+            <span className="label-caps mb-sm block text-primary font-semibold">REPOSITORY FULL NAME</span>
             <input
               autoFocus
               className="field"
@@ -130,7 +131,7 @@ export function Dashboard() {
               value={repoFullName}
             />
           </label>
-          <button className="button-primary self-end" disabled={submitting} type="submit">
+          <button className="button-primary self-end h-[38px] sm:h-[40px] px-lg" disabled={submitting} type="submit">
             {submitting ? "Registering..." : "Register repo"}
           </button>
         </form>

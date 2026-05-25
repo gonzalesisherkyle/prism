@@ -27,21 +27,33 @@ export function Login() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-surface px-md">
-      <section className="w-full max-w-[432px] border border-structure bg-card p-xl text-center">
-        <div className="mb-xl flex justify-center">
+    <main className="relative flex min-h-screen items-center justify-center bg-surface px-md overflow-hidden">
+      {/* Decorative ambient lights */}
+      <div className="absolute top-[20%] left-[15%] h-80 w-80 rounded-full bg-primary/15 blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[20%] right-[15%] h-80 w-80 rounded-full bg-ai-active/10 blur-[120px] pointer-events-none" />
+
+      {/* Cyber Grid Background */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] pointer-events-none" />
+
+      <section className="relative w-full max-w-[440px] border border-structure/60 bg-card/80 backdrop-blur-xl p-xl rounded-none text-center shadow-2xl shadow-black/80 overflow-hidden">
+        {/* Glow Accent Top Bar */}
+        <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-primary via-primary-container to-diagnostic-suggestion" />
+        
+        <div className="mb-xl flex justify-center scale-105">
           <Logo />
         </div>
-        <p className="label-caps mb-md">AI CODE REVIEW ASSISTANT</p>
-        <h1 className="mb-md text-display-lg text-on-surface">Connect your workflow.</h1>
-        <p className="mb-xl text-body-md text-secondary">
-          Prism analyzes pull requests and posts precise inline review comments to GitHub.
+        <p className="label-caps mb-md text-primary tracking-[0.15em] font-semibold">AI CODE REVIEW ASSISTANT</p>
+        <h1 className="mb-md text-display-lg font-bold tracking-tight text-on-surface leading-tight">
+          Connect your workflow.
+        </h1>
+        <p className="mb-xl text-body-md text-secondary leading-relaxed px-sm">
+          Prism analyzes pull requests and posts precise inline review comments directly to GitHub.
         </p>
-        <a className="button-github w-full" href={`${apiBaseUrl}/auth/github`}>
+        <a className="button-github w-full flex items-center justify-center gap-md py-lg" href={`${apiBaseUrl}/auth/github`}>
           <GitHubMark />
-          Sign in with GitHub
+          <span>Sign in with GitHub</span>
         </a>
-        <p className="mt-lg font-mono text-code-sm text-outline">
+        <p className="mt-lg font-mono text-[11px] text-outline tracking-normal">
           Repository access is required for automated reviews.
         </p>
       </section>

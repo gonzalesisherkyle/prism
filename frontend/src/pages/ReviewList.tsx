@@ -70,20 +70,22 @@ export function ReviewList() {
         <section aria-label="Repository review history" className="grid gap-md">
           {reviews.map((review) => (
             <Link
-              className="panel flex flex-col gap-md p-lg transition-colors hover:border-ai-active sm:flex-row sm:items-center"
+              className="panel group flex flex-col gap-md p-lg transition-all duration-300 hover:-translate-y-[2px] hover:shadow-2xl hover:shadow-primary/5 hover:border-primary/40 sm:flex-row sm:items-center"
               key={reviewIdentifier(review)}
               to={`/reviews/${reviewIdentifier(review)}`}
             >
               <div className="min-w-0 flex-1">
                 <div className="mb-sm flex flex-wrap items-center gap-md">
-                  <p className="font-mono text-code-sm text-outline">PR #{review.prNumber}</p>
+                  <span className="bg-surface-container-high/60 border border-structure/50 rounded-none px-sm py-0.5 font-mono text-code-sm text-secondary">
+                    PR #{review.prNumber}
+                  </span>
                   <ScoreBadge score={review.score} />
                   <p className="font-mono text-code-sm text-outline">{formatDate(review.createdAt)}</p>
                 </div>
-                <h2 className="mb-xs truncate text-title-sm text-on-surface">{review.prTitle}</h2>
-                <p className="truncate text-body-md text-secondary">{review.summary}</p>
+                <h2 className="mb-xs truncate text-title-sm text-on-surface font-semibold group-hover:text-primary transition-colors">{review.prTitle}</h2>
+                <p className="truncate text-body-md text-secondary leading-relaxed">{review.summary}</p>
               </div>
-              <ArrowRight aria-hidden="true" className="shrink-0 text-outline" size={18} />
+              <ArrowRight aria-hidden="true" className="shrink-0 text-outline transition-transform duration-300 group-hover:translate-x-1 group-hover:text-primary" size={18} />
             </Link>
           ))}
         </section>
