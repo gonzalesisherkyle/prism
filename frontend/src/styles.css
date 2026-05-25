@@ -1,0 +1,83 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #d0bcff;
+  --color-outline: #958ea0;
+  --color-structure: #30363d;
+  --color-card: #161b22;
+}
+
+@layer base {
+  * {
+    border-color: #30363d;
+    box-sizing: border-box;
+  }
+
+  body {
+    @apply m-0 min-w-[320px] bg-surface font-sans text-body-md text-on-surface antialiased;
+  }
+
+  #root {
+    @apply min-h-screen;
+  }
+
+  a {
+    @apply text-inherit no-underline;
+  }
+
+  button,
+  input {
+    @apply rounded-none;
+    font: inherit;
+  }
+}
+
+@layer components {
+  .label-caps {
+    @apply font-mono text-label-caps uppercase text-outline;
+  }
+
+  .panel {
+    @apply border border-structure bg-card;
+  }
+
+  .button-primary {
+    @apply inline-flex items-center justify-center gap-sm border border-primary-container bg-primary-container px-md py-sm text-body-md font-semibold text-on-surface transition-colors hover:border-primary hover:bg-primary hover:text-on-primary;
+  }
+
+  .button-ghost {
+    @apply inline-flex items-center justify-center gap-sm border border-structure bg-transparent px-md py-sm text-body-md font-semibold text-secondary transition-colors hover:border-ai-active hover:text-on-surface;
+  }
+
+  .button-github {
+    @apply inline-flex items-center justify-center gap-sm border border-inverse-surface bg-inverse-surface px-lg py-md text-body-md font-semibold text-inverse-on-surface transition-colors hover:border-primary hover:bg-primary;
+  }
+
+  .field {
+    @apply w-full border border-structure bg-surface-container-lowest px-md py-sm font-mono text-code-md text-on-surface outline-none transition-colors placeholder:text-outline focus:border-primary-container;
+  }
+
+  .badge {
+    @apply inline-flex border px-sm py-xs font-mono text-label-caps uppercase;
+  }
+
+  .badge-critical {
+    @apply border-error bg-error/15 text-error;
+  }
+
+  .badge-warning {
+    @apply border-tertiary bg-tertiary/15 text-tertiary;
+  }
+
+  .badge-success {
+    @apply border-diagnostic-success bg-diagnostic-success/15 text-diagnostic-success;
+  }
+
+  .badge-suggestion {
+    @apply border-diagnostic-suggestion bg-diagnostic-suggestion/15 text-diagnostic-suggestion;
+  }
+}

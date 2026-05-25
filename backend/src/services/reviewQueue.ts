@@ -1,0 +1,208 @@
+import { HttpError } from "../errors/HttpError.js";
+import { RepoModel } from "../models/Repo.js";
+import { ReviewModel, type ReviewDocument } from "../models/Review.js";
+import { UserModel } from "../models/User.js";
+import type { FileReviewResult, ReviewComment } from "../types/review.js";
+import { parseDiff, type Hunk } from "../utils/diffParser.js";
+import { getEmbedding } from "./embeddingService.js";
+import { getPRFiles, postReviewComments } from "./githubService.js";
+import { reviewFile } from "./llmService.js";
+
+export interface ReviewQueuePayload {
+  repoId: number;
+  repoFullName: string;
+  prNumber: number;
+  prTitle: string;
+  headSha: string;
+  senderLogin: string;
+}
+
+interface ReviewedFile {
+  filename: string;
+  review: FileReviewResult;
+}
+
+const languageByExtension: Readonly<Record<string, string>> = {
+  c: "C",
+  cpp: "C++",
+  cs: "C#",
+  css: "CSS",
+  go: "Go",
+  html: "HTML",
+  java: "Java",
+  js: "JavaScript",
+  json: "JSON",
+  jsx: "JavaScript JSX",
+  kt: "Kotlin",
+  md: "Markdown",
+  php: "PHP",
+  py: "Python",
+  rb: "Ruby",
+  rs: "Rust",
+  sh: "Shell",
+  sql: "SQL",
+  ts: "TypeScript",
+  tsx: "TypeScript JSX",
+  yaml: "YAML",
+  yml: "YAML",
+};
+
+let pendingReviews: Promise<void> = Promise.resolve();
+
+function splitRepositoryName(repoFullName: string): [owner: string, repo: string] {
+  const segments = repoFullName.split("/");
+
+  if (segments.length !== 2 || !segments[0] || !segments[1]) {
+    throw new HttpError(400, "Registered repository name is invalid.");
+  }
+
+  return [segments[0], segments[1]];
+}
+
+function languageForFile(filename: string): string {
+  const extension = filename.split(".").pop()?.toLowerCase();
+
+  return extension ? languageByExtension[extension] ?? "Plain text" : "Plain text";
+}
+
+function addedLineNumbers(hunks: Hunk[]): Set<number> {
+  return new Set(
+    hunks.flatMap((hunk) =>
+      hunk.lines.flatMap((line) =>
+        line.type === "added" && line.newLineNumber !== null ? [line.newLineNumber] : [],
+      ),
+    ),
+  );
+}
+
+function publishableComments(
+  comments: ReviewComment[],
+  filename: string,
+  hunks: Hunk[],
+): ReviewComment[] {
+  const addedLines = addedLineNumbers(hunks);
+
+  // GitHub's RIGHT-side line API rejects comments outside current added lines.
+  return comments.filter(
+    (comment) => comment.path === filename && addedLines.has(comment.line),
+  );
+}
+
+function aggregateScore(reviewedFiles: ReviewedFile[]): number {
+  if (reviewedFiles.length === 0) {
+    return 10;
+  }
+
+  const total = reviewedFiles.reduce((sum, file) => sum + file.review.score, 0);
+
+  return Math.round((total / reviewedFiles.length) * 10) / 10;
+}
+
+function aggregateSummary(reviewedFiles: ReviewedFile[]): string {
+  if (reviewedFiles.length === 0) {
+    return "No textual added-line hunks were available for automated inline review.";
+  }
+
+  return reviewedFiles
+    .map((file) => `${file.filename}: ${file.review.summary}`)
+    .join("\n");
+}
+
+export async function processReview(
+  payload: ReviewQueuePayload,
+): Promise<ReviewDocument | undefined> {
+  const registration = await RepoModel.findOne({ repoId: payload.repoId })
+    .sort({ createdAt: 1 })
+    .exec();
+
+  if (!registration) {
+    console.info("Ignoring pull request event for an unregistered repository.", {
+      repoId: payload.repoId,
+      repoFullName: payload.repoFullName,
+    });
+    return undefined;
+  }
+
+  const completedReview = await ReviewModel.exists({
+    repoId: payload.repoId,
+    prNumber: payload.prNumber,
+    headSha: payload.headSha,
+  });
+
+  if (completedReview) {
+    console.info("Ignoring an already reviewed pull request revision.", {
+      repoId: payload.repoId,
+      prNumber: payload.prNumber,
+      headSha: payload.headSha,
+    });
+    return undefined;
+  }
+
+  const user = await UserModel.findById(registration.ownerId).select("+accessToken").exec();
+
+  if (!user) {
+    throw new HttpError(401, "No GitHub user is available for the registered repository.");
+  }
+
+  const [owner, repo] = splitRepositoryName(registration.fullName);
+  const files = await getPRFiles(owner, repo, payload.prNumber, user.accessToken);
+  const reviewedFiles: ReviewedFile[] = [];
+
+  // Review files sequentially to avoid amplifying free-tier request bursts.
+  for (const file of files) {
+    if (!file.patch) {
+      continue;
+    }
+
+    const hunks = parseDiff(file.patch, file.filename);
+
+    if (addedLineNumbers(hunks).size === 0) {
+      continue;
+    }
+
+    const fileReview = await reviewFile(file.filename, languageForFile(file.filename), hunks);
+
+    reviewedFiles.push({
+      filename: file.filename,
+      review: {
+        ...fileReview,
+        comments: publishableComments(fileReview.comments, file.filename, hunks),
+      },
+    });
+  }
+
+  const comments = reviewedFiles.flatMap((file) => file.review.comments);
+  const score = aggregateScore(reviewedFiles);
+  const summary = aggregateSummary(reviewedFiles);
+  const summaryEmbedding = await getEmbedding(summary);
+
+  await postReviewComments(owner, repo, payload.prNumber, comments, user.accessToken, {
+    commitId: payload.headSha,
+    body: `## Prism Review\n\n**Score:** ${score}/10\n\n${summary}`,
+  });
+
+  return ReviewModel.create({
+    prNumber: payload.prNumber,
+    prTitle: payload.prTitle,
+    repoId: payload.repoId,
+    repoFullName: payload.repoFullName,
+    score,
+    summary,
+    summaryEmbedding,
+    comments,
+    headSha: payload.headSha,
+  });
+}
+
+export const reviewQueue = {
+  async add(payload: ReviewQueuePayload): Promise<void> {
+    // This keeps webhook responses quick; use a durable queue before deploying multiple workers.
+    pendingReviews = pendingReviews
+      .then(async () => {
+        await processReview(payload);
+      })
+      .catch((error: unknown) => {
+        console.error("Unable to process queued pull request review.", error);
+      });
+  },
+};
