@@ -10,6 +10,7 @@ import authRouter from "./routes/authRoutes.js";
 import repoRouter from "./routes/repoRoutes.js";
 import reviewRouter from "./routes/reviewRoutes.js";
 import searchRouter from "./routes/searchRoutes.js";
+import shareRouter from "./routes/shareRoutes.js";
 import webhookRouter from "./routes/webhookRoutes.js";
 
 const app = express();
@@ -24,7 +25,7 @@ const corsOptions: CorsOptions = {
     callback(new HttpError(403, "This browser origin is not permitted."));
   },
   credentials: true,
-  methods: ["GET", "POST", "OPTIONS"],
+  methods: ["GET", "POST", "DELETE", "OPTIONS"],
   allowedHeaders: ["Authorization", "Content-Type"],
   maxAge: 86_400,
 };
@@ -47,6 +48,7 @@ app.use("/auth", authRouter);
 app.use("/repos", repoRouter);
 app.use("/reviews", reviewRouter);
 app.use("/search", searchRouter);
+app.use("/share", shareRouter);
 
 app.use(errorHandler);
 

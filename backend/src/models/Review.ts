@@ -11,6 +11,8 @@ export interface Review {
   summary: string;
   prSummary: string;
   summaryEmbedding: number[];
+  shareToken?: string;
+  isShareable: boolean;
   comments: ReviewComment[];
   headSha: string;
   createdAt: Date;
@@ -82,6 +84,16 @@ const reviewSchema = new Schema<Review>(
     summaryEmbedding: {
       type: [Number],
       required: true,
+    },
+    shareToken: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+    isShareable: {
+      type: Boolean,
+      required: true,
+      default: false,
     },
     comments: {
       type: [reviewCommentSchema],

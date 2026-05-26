@@ -40,9 +40,21 @@ export interface Review {
   score: number;
   summary: string;
   prSummary?: string;
+  isShareable?: boolean;
+  shareUrl?: string | null;
   comments: ReviewComment[];
   headSha: string;
   createdAt: string;
+}
+
+export interface SharedReview {
+  prTitle: string;
+  repoFullName: string;
+  score: number;
+  prSummary: string;
+  comments: ReviewComment[];
+  createdAt: string;
+  headSha: string;
 }
 
 export interface DashboardRepository extends Repository {

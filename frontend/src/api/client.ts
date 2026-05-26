@@ -7,6 +7,7 @@ import type {
   RepositoryWithHealth,
   Review,
   SearchResult,
+  SharedReview,
 } from "../types/api";
 
 const apiBaseUrl = import.meta.env.VITE_API_URL ?? "http://localhost:4000";
@@ -100,6 +101,26 @@ export async function fetchReview(reviewId: string): Promise<Review> {
   );
 
   return unpackRecord(response.data);
+}
+
+export async function enableReviewSharing(reviewId: string): Promise<{ shareUrl: string }> {
+  const response = await apiClient.post<{ shareUrl: string }>(
+    `/reviews/${encodeURIComponent(reviewId)}/share`,
+  );
+
+  return response.data;
+}
+
+export async function disableReviewSharing(reviewId: string): Promise<void> {
+  await apiClient.delete(`/reviews/${encodeURIComponent(reviewId)}/share`);
+}
+
+export async function fetchSharedReview(shareToken: string): Promise<SharedReview> {
+  const response = await apiClient.get<SharedReview>(
+    `/share/${encodeURIComponent(shareToken)}`,
+  );
+
+  return response.data;
 }
 
 export async function searchReviews(

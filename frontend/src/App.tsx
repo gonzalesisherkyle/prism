@@ -31,6 +31,10 @@ const Search = lazy(async () => {
   const module = await import("./pages/Search");
   return { default: module.Search };
 });
+const SharedReview = lazy(async () => {
+  const module = await import("./pages/SharedReview");
+  return { default: module.SharedReview };
+});
 
 function EntryRoute() {
   const location = useLocation();
@@ -51,6 +55,14 @@ function ApplicationRoutes() {
       <Route element={<Login />} path="/login" />
       <Route element={<AuthCallback />} path="/auth/callback" />
       <Route element={<AuthCallback />} path="/oauth/callback" />
+      <Route
+        element={
+          <Suspense fallback={<p className="label-caps p-lg">LOADING SHARED REVIEW</p>}>
+            <SharedReview />
+          </Suspense>
+        }
+        path="/share/:shareToken"
+      />
 
       <Route element={<ProtectedRoute />}>
         <Route element={<AppShell />}>
