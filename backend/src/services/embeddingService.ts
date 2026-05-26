@@ -57,3 +57,7 @@ export async function getEmbedding(text: string): Promise<number[]> {
 
   return embedding.embedding;
 }
+
+export async function getQueryEmbedding(query: string): Promise<number[]> {
+  return getEmbedding(query);
+}

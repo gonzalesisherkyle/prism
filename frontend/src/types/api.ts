@@ -35,7 +35,16 @@ export interface DashboardRepository extends Repository {
   totalReviews: number;
 }
 
+export interface SearchResult {
+  _id: string;
+  prTitle: string;
+  repoFullName: string;
+  score: number;
+  summary: string;
+  createdAt: string;
+  similarity: number;
+}
+
 export function reviewIdentifier(review: Review): string {
   return review.id ?? review._id ?? `${review.repoId}-${review.prNumber}-${review.headSha}`;
 }
-

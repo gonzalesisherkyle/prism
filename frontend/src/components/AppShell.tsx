@@ -1,4 +1,4 @@
-import { FolderGit2, LayoutDashboard, Menu, MessagesSquare, Settings, X } from "lucide-react";
+import { FolderGit2, LayoutDashboard, Menu, MessagesSquare, Search, Settings, X } from "lucide-react";
 import { type ComponentType, useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 
@@ -15,6 +15,7 @@ interface NavigationItem {
 const navigationItems: NavigationItem[] = [
   { label: "Dashboard", to: "/dashboard", icon: LayoutDashboard, end: true },
   { label: "Repos", to: "/repos", icon: FolderGit2 },
+  { label: "Search", to: "/search", icon: Search },
   { label: "Reviews", to: "/reviews", icon: MessagesSquare },
   { label: "Settings", to: "/settings", icon: Settings },
 ];

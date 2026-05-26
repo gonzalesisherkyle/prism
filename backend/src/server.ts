@@ -9,6 +9,7 @@ import { errorHandler } from "./middleware/errorHandler.js";
 import authRouter from "./routes/authRoutes.js";
 import repoRouter from "./routes/repoRoutes.js";
 import reviewRouter from "./routes/reviewRoutes.js";
+import searchRouter from "./routes/searchRoutes.js";
 import webhookRouter from "./routes/webhookRoutes.js";
 
 const app = express();
@@ -45,6 +46,7 @@ app.get("/health", (_request, response) => {
 app.use("/auth", authRouter);
 app.use("/repos", repoRouter);
 app.use("/reviews", reviewRouter);
+app.use("/search", searchRouter);
 
 app.use(errorHandler);
 

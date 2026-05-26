@@ -1,7 +1,7 @@
 import axios from "axios";
 
 import { authStorageKey, clearStoredToken } from "../auth/storage";
-import type { Repository, Review } from "../types/api";
+import type { Repository, Review, SearchResult } from "../types/api";
 
 const apiBaseUrl = import.meta.env.VITE_API_URL ?? "http://localhost:4000";
 
@@ -84,4 +84,20 @@ export async function fetchReview(reviewId: string): Promise<Review> {
   );
 
   return unpackRecord(response.data);
+}
+
+export async function searchReviews(
+  query: string,
+  repoId?: number,
+  signal?: AbortSignal,
+): Promise<SearchResult[]> {
+  const response = await apiClient.get<{ results: SearchResult[] }>("/search", {
+    params: {
+      q: query,
+      ...(repoId === undefined ? {} : { repoId }),
+    },
+    signal,
+  });
+
+  return response.data.results;
 }

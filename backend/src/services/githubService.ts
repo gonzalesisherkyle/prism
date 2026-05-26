@@ -75,6 +75,35 @@ function githubMessage(payload: unknown): string | undefined {
     : undefined;
 }
 
+function githubValidationMessage(payload: unknown, fallback: string): string {
+  const message = githubMessage(payload) ?? fallback;
+
+  if (!isRecord(payload) || !Array.isArray(payload.errors)) {
+    return message;
+  }
+
+  const details = payload.errors.flatMap((error) => {
+    if (typeof error === "string" && error.trim()) {
+      return [error.trim()];
+    }
+
+    if (!isRecord(error)) {
+      return [];
+    }
+
+    if (typeof error.message === "string" && error.message.trim()) {
+      return [error.message.trim()];
+    }
+
+    const field = typeof error.field === "string" ? `${error.field}: ` : "";
+    const code = typeof error.code === "string" ? error.code : undefined;
+
+    return code ? [`${field}${code}`] : [];
+  });
+
+  return details.length > 0 ? `${message}: ${details.join("; ")}` : message;
+}
+
 function handleGitHubFailure(response: Response, payload: unknown, operationName: string): never {
   if (response.status === 401 || response.status === 403) {
     throw new HttpError(
@@ -90,7 +119,7 @@ function handleGitHubFailure(response: Response, payload: unknown, operationName
   if (response.status === 422) {
     throw new HttpError(
       operationName === "repository webhook registration" ? 409 : 502,
-      githubMessage(payload) ?? `GitHub rejected ${operationName}.`,
+      githubValidationMessage(payload, `GitHub rejected ${operationName}.`),
     );
   }
 
@@ -153,6 +182,20 @@ export async function createGitHubWebhook(
 ): Promise<GitHubWebhook> {
   const repositoryPath = apiRepositoryPath(repoFullName);
   const webhookUrl = `${env.publicApiUrl}/webhook/github`;
+
+  const webhookHost = new URL(webhookUrl).hostname.toLowerCase();
+  const unusableDevelopmentHosts = new Set(["localhost", "127.0.0.1", "::1"]);
+
+  if (
+    webhookHost.endsWith(".example") ||
+    unusableDevelopmentHosts.has(webhookHost)
+  ) {
+    throw new HttpError(
+      400,
+      "Configure PUBLIC_API_URL with a public HTTPS tunnel URL before registering a repository.",
+    );
+  }
+
   const { response, payload } = await githubRequest(
     `/repos/${repositoryPath}/hooks`,
     accessToken,
@@ -173,6 +216,14 @@ export async function createGitHubWebhook(
   );
 
   if (!response.ok) {
+    if (response.status === 422) {
+      console.error("GitHub rejected repository webhook registration.", {
+        repoFullName,
+        webhookUrl,
+        detail: githubValidationMessage(payload, "Validation Failed"),
+      });
+    }
+
     handleGitHubFailure(response, payload, "repository webhook registration");
   }
 

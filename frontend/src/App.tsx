@@ -27,6 +27,10 @@ const Settings = lazy(async () => {
   const module = await import("./pages/Settings");
   return { default: module.Settings };
 });
+const Search = lazy(async () => {
+  const module = await import("./pages/Search");
+  return { default: module.Search };
+});
 
 function EntryRoute() {
   const location = useLocation();
@@ -81,6 +85,14 @@ function ApplicationRoutes() {
               </Suspense>
             }
             path="/reviews"
+          />
+          <Route
+            element={
+              <Suspense fallback={<p className="label-caps">LOADING SEARCH</p>}>
+                <Search />
+              </Suspense>
+            }
+            path="/search"
           />
           <Route
             element={

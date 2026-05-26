@@ -9,8 +9,11 @@ import {
 } from "../api/client";
 import { PageHeader } from "../components/PageHeader";
 import { RepoCard } from "../components/RepoCard";
+import { ReviewSearchBar } from "../components/ReviewSearchBar";
+import { SearchResults } from "../components/SearchResults";
 import { StatusPanel } from "../components/StatusPanel";
 import { usePageTitle } from "../hooks/usePageTitle";
+import { useReviewSearch } from "../hooks/useReviewSearch";
 import type { DashboardRepository, Repository } from "../types/api";
 import { requestErrorMessage } from "../utils";
 
@@ -35,6 +38,8 @@ export function Dashboard() {
   const [formOpen, setFormOpen] = useState(false);
   const [repoFullName, setRepoFullName] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const search = useReviewSearch(searchQuery);
 
   usePageTitle(isReposView ? "Repositories" : "Dashboard");
 
@@ -117,6 +122,14 @@ export function Dashboard() {
         title={isReposView ? "Registered repositories" : "Dashboard"}
       />
 
+      {!isReposView && (
+        <ReviewSearchBar
+          loading={search.loading}
+          onChange={setSearchQuery}
+          value={searchQuery}
+        />
+      )}
+
       {formOpen && (
         <form className="panel mb-xl flex flex-col gap-md p-lg sm:flex-row border-primary/30 shadow-lg shadow-primary/5 relative overflow-hidden transition-all duration-500" onSubmit={handleRegister}>
           <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary via-primary-container to-transparent" />
@@ -137,7 +150,14 @@ export function Dashboard() {
         </form>
       )}
 
-      {loading ? (
+      {!isReposView && search.hasQuery ? (
+        <SearchResults
+          error={search.error}
+          loading={search.loading}
+          query={searchQuery}
+          results={search.results}
+        />
+      ) : loading ? (
         <StatusPanel label="LOADING" message="Fetching registered repositories..." />
       ) : error ? (
         <StatusPanel label="REQUEST ERROR" message={error} tone="error" />
