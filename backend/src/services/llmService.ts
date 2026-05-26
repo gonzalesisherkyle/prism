@@ -8,6 +8,15 @@ const maxCommentsPerFile = 8;
 const systemPrompt =
   "You are Prism, a senior engineer reviewing a pull request. Respond ONLY with a valid JSON object in this exact shape: { score: number (1-10), summary: string, comments: [{ path, line, severity: 'critical'|'warning'|'suggestion', body }] }. No markdown, no explanation, just the JSON.\n\n" +
   "Rules: Return at most 8 comments per file. Only flag real issues such as bugs, security vulnerabilities, or missing error handling. Do not nitpick style. Inline comments must target an added line in the supplied patch, using that line's newLineNumber and the exact filename path.";
+const summarySystemPrompt =
+  "You are Prism, an AI code review assistant. Given a list of changed files and their diffs, write a concise one-paragraph plain English summary of what this pull request does. Focus on intent and impact, not implementation details. Do not mention file names directly. Write for a developer who needs quick context before reviewing.";
+const summaryFallback =
+  "Prism could not generate a pull request summary for this revision.";
+
+export interface PRSummaryFile {
+  filename: string;
+  patch: string;
+}
 
 interface OpenRouterChatChoice {
   message: {
@@ -132,4 +141,43 @@ export async function reviewFile(
   }
 
   return parseReviewResult(choice.message.content, filename);
+}
+
+export async function generatePRSummary(files: PRSummaryFile[]): Promise<string> {
+  try {
+    const response = await requestOpenRouter(
+      "/chat/completions",
+      {
+        model: reviewModel,
+        temperature: 0.1,
+        max_tokens: 500,
+        messages: [
+          {
+            role: "system",
+            content: summarySystemPrompt,
+          },
+          {
+            role: "user",
+            content: JSON.stringify(files),
+          },
+        ],
+      },
+      "pull request summary generation",
+    );
+
+    if (!isChatResponse(response)) {
+      throw new HttpError(502, "OpenRouter returned an invalid summary response.");
+    }
+
+    const summary = response.choices[0]?.message.content.trim();
+
+    if (!summary) {
+      throw new HttpError(502, "OpenRouter returned an empty pull request summary.");
+    }
+
+    return summary;
+  } catch (error: unknown) {
+    console.error("Unable to generate pull request summary; using fallback.", error);
+    return summaryFallback;
+  }
 }

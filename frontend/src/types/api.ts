@@ -25,6 +25,7 @@ export interface Review {
   repoFullName: string;
   score: number;
   summary: string;
+  prSummary?: string;
   comments: ReviewComment[];
   headSha: string;
   createdAt: string;

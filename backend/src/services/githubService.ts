@@ -23,6 +23,10 @@ export interface GitHubReview {
   id: number;
 }
 
+export interface GitHubIssueComment {
+  id: number;
+}
+
 export interface PostReviewOptions {
   body?: string;
   commitId?: string;
@@ -338,6 +342,40 @@ export async function postReviewComments(
 
   if (!isRecord(payload) || typeof payload.id !== "number") {
     throw new HttpError(502, "GitHub returned an invalid pull request review response.");
+  }
+
+  return { id: payload.id };
+}
+
+export async function postIssueComment(
+  owner: string,
+  repo: string,
+  prNumber: number,
+  body: string,
+  accessToken: string,
+): Promise<GitHubIssueComment> {
+  validatePullRequestNumber(prNumber);
+
+  if (body.trim().length === 0) {
+    throw new HttpError(400, "Comment body must not be empty.");
+  }
+
+  const repositoryPath = apiRepositoryPath(`${owner}/${repo}`);
+  const { response, payload } = await githubRequest(
+    `/repos/${repositoryPath}/issues/${prNumber}/comments`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify({ body }),
+    },
+  );
+
+  if (!response.ok) {
+    handleGitHubFailure(response, payload, "pull request summary publication");
+  }
+
+  if (!isRecord(payload) || typeof payload.id !== "number") {
+    throw new HttpError(502, "GitHub returned an invalid pull request comment response.");
   }
 
   return { id: payload.id };

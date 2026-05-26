@@ -32,6 +32,7 @@ function serializeReview(review: ReviewDocument) {
     repoFullName: review.repoFullName,
     score: review.score,
     summary: review.summary,
+    prSummary: review.prSummary ?? "",
     comments: review.comments,
     headSha: review.headSha,
     createdAt: review.createdAt,
@@ -83,4 +84,3 @@ export const getReview: RequestHandler = async (request, response, next) => {
     next(error);
   }
 };
-

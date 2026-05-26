@@ -9,6 +9,7 @@ export interface Review {
   repoFullName: string;
   score: number;
   summary: string;
+  prSummary: string;
   summaryEmbedding: number[];
   comments: ReviewComment[];
   headSha: string;
@@ -72,6 +73,11 @@ const reviewSchema = new Schema<Review>(
     summary: {
       type: String,
       required: true,
+    },
+    prSummary: {
+      type: String,
+      required: true,
+      default: "",
     },
     summaryEmbedding: {
       type: [Number],
