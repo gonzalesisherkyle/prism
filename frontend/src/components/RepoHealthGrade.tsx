@@ -1,7 +1,7 @@
 import type { HealthGrade, HealthTrend, RepositoryHealth } from "../types/api";
 
 interface RepoHealthGradeProps {
-  health: RepositoryHealth;
+  health?: RepositoryHealth;
   compact?: boolean;
 }
 
@@ -30,7 +30,7 @@ export function gradeTextClass(grade: HealthGrade): string {
 }
 
 export function RepoHealthGrade({ health, compact = false }: RepoHealthGradeProps) {
-  const hasEnoughData = health.reviewCount >= 3;
+  const hasEnoughData = health !== undefined && health.reviewCount >= 3;
 
   return (
     <div
@@ -41,7 +41,7 @@ export function RepoHealthGrade({ health, compact = false }: RepoHealthGradeProp
       }
     >
       <p className="label-caps mb-xs">HEALTH</p>
-      {hasEnoughData ? (
+      {hasEnoughData && health ? (
         <>
           <div className="flex items-center justify-end gap-sm font-mono">
             <span

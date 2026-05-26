@@ -20,7 +20,7 @@ export interface Repository {
 }
 
 export interface RepositoryWithHealth extends Repository {
-  health: RepositoryHealth;
+  health?: RepositoryHealth;
 }
 
 export interface ReviewComment {
@@ -45,7 +45,8 @@ export interface Review {
   createdAt: string;
 }
 
-export interface DashboardRepository extends RepositoryWithHealth {
+export interface DashboardRepository extends Repository {
+  health: RepositoryHealth;
   lastReviewScore: number | null;
   totalReviews: number;
 }

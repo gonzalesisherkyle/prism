@@ -9,7 +9,7 @@ import { StatusPanel } from "../components/StatusPanel";
 import { usePageTitle } from "../hooks/usePageTitle";
 import type { RepositoryHealth, Review } from "../types/api";
 import { reviewIdentifier } from "../types/api";
-import { requestErrorMessage } from "../utils";
+import { repositoryHealthFromReviews, requestErrorMessage } from "../utils";
 
 interface ReviewListLocationState {
   repoFullName?: string;
@@ -39,14 +39,14 @@ export function ReviewList() {
       try {
         const [response, repositoryHealth] = await Promise.all([
           fetchReviews(numericRepoId),
-          fetchRepositoryHealth(numericRepoId),
+          fetchRepositoryHealth(numericRepoId).catch(() => null),
         ]);
-        setHealth(repositoryHealth);
-        setReviews(
-          [...response].sort(
-            (left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt),
-          ),
+        const sortedReviews = [...response].sort(
+          (left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt),
         );
+
+        setHealth(repositoryHealth ?? repositoryHealthFromReviews(sortedReviews));
+        setReviews(sortedReviews);
       } catch (requestError) {
         setError(requestErrorMessage(requestError));
       } finally {

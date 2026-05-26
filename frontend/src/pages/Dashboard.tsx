@@ -16,7 +16,7 @@ import { StatusPanel } from "../components/StatusPanel";
 import { usePageTitle } from "../hooks/usePageTitle";
 import { useReviewSearch } from "../hooks/useReviewSearch";
 import type { DashboardRepository, HealthGrade, RepositoryWithHealth } from "../types/api";
-import { requestErrorMessage } from "../utils";
+import { repositoryHealthFromReviews, requestErrorMessage } from "../utils";
 
 function latestScore(reviews: Awaited<ReturnType<typeof fetchReviews>>): number | null {
   if (reviews.length === 0) {
@@ -58,12 +58,14 @@ export function Dashboard() {
 
             return {
               ...repo,
+              health: repo.health ?? repositoryHealthFromReviews(reviews),
               lastReviewScore: latestScore(reviews),
               totalReviews: reviews.length,
             };
           } catch {
             return {
               ...repo,
+              health: repo.health ?? repositoryHealthFromReviews([]),
               lastReviewScore: null,
               totalReviews: 0,
             };
