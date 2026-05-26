@@ -10,7 +10,7 @@ interface PageHeaderProps {
 export function PageHeader({ eyebrow, title, description, action }: PageHeaderProps) {
   return (
     <header className="mb-xl flex flex-wrap items-end justify-between gap-lg border-b border-structure pb-lg">
-      <div>
+      <div className="min-w-0 flex-1">
         <p className="label-caps mb-sm">{eyebrow}</p>
         <h1 className="break-words text-headline-md text-on-surface">{title}</h1>
         {description && <p className="mt-sm max-w-2xl text-body-md text-secondary">{description}</p>}

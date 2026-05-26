@@ -1,3 +1,4 @@
+import { ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { fetchRepositories } from "../api/client";
@@ -45,20 +46,27 @@ export function Search() {
       <ReviewSearchBar loading={search.loading} onChange={setQuery} value={query}>
         <label>
           <span className="label-caps mb-sm block text-primary">REPOSITORY FILTER</span>
-          <select
-            aria-label="Filter results by repository"
-            className="field py-md"
-            disabled={repositoriesLoading}
-            onChange={(event) => setRepoFilter(event.target.value)}
-            value={repoFilter}
-          >
-            <option value="">All repositories</option>
-            {repositories.map((repository) => (
-              <option key={repository.repoId} value={repository.repoId}>
-                {repository.fullName}
-              </option>
-            ))}
-          </select>
+          <span className="relative block">
+            <select
+              aria-label="Filter results by repository"
+              className="field appearance-none py-md pr-xl"
+              disabled={repositoriesLoading}
+              onChange={(event) => setRepoFilter(event.target.value)}
+              value={repoFilter}
+            >
+              <option value="">All repositories</option>
+              {repositories.map((repository) => (
+                <option key={repository.repoId} value={repository.repoId}>
+                  {repository.fullName}
+                </option>
+              ))}
+            </select>
+            <ChevronDown
+              aria-hidden="true"
+              className="pointer-events-none absolute right-md top-1/2 -translate-y-1/2 text-outline"
+              size={16}
+            />
+          </span>
           {repositoriesError && (
             <p className="mt-sm text-body-sm text-error">Repository filters unavailable.</p>
           )}
