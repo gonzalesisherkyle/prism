@@ -78,7 +78,6 @@ const reviewSchema = new Schema<Review>(
     },
     prSummary: {
       type: String,
-      required: true,
       default: "",
     },
     summaryEmbedding: {
