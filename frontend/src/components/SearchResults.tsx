@@ -50,20 +50,20 @@ export function SearchResults({
     <section aria-label="Semantic search results" className="grid gap-md">
       {results.map((result) => (
         <Link
-          className="panel group flex flex-col gap-md border-l-4 border-l-primary/60 p-lg transition-all duration-300 hover:-translate-y-[2px] hover:border-primary hover:shadow-2xl hover:shadow-primary/10 sm:flex-row sm:items-center"
+          className="panel group flex min-w-0 max-w-full flex-col gap-md overflow-hidden border-l-4 border-l-primary/60 p-lg transition-all duration-300 hover:-translate-y-[2px] hover:border-primary hover:shadow-2xl hover:shadow-primary/10 sm:flex-row sm:items-center"
           key={result._id}
           to={`/reviews/${encodeURIComponent(result._id)}`}
         >
-          <div className="min-w-0 flex-1">
-            <div className="mb-sm flex flex-wrap items-center gap-md">
-              <p className="label-caps text-primary">{result.repoFullName}</p>
+          <div className="min-w-0 max-w-full flex-1 overflow-hidden">
+            <div className="mb-sm flex min-w-0 flex-wrap items-center gap-md">
+              <p className="label-caps max-w-full truncate text-primary">{result.repoFullName}</p>
               <ScoreBadge score={result.score} />
               <p className="font-mono text-code-sm text-outline">{formatDate(result.createdAt)}</p>
             </div>
-            <h2 className="mb-xs truncate text-title-sm font-semibold text-on-surface transition-colors group-hover:text-primary">
+            <h2 className="mb-xs block max-w-full truncate text-title-sm font-semibold text-on-surface transition-colors group-hover:text-primary">
               {result.prTitle}
             </h2>
-            <p className="truncate text-body-md text-secondary">{result.summary}</p>
+            <p className="block max-w-full truncate text-body-md text-secondary">{result.summary}</p>
           </div>
           <div className="flex shrink-0 items-center gap-md sm:pl-md">
             <div className="border border-primary/20 bg-primary/10 px-md py-sm text-right">
