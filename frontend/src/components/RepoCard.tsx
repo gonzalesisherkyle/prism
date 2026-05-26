@@ -2,6 +2,7 @@ import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import type { DashboardRepository } from "../types/api";
+import { RepoHealthGrade } from "./RepoHealthGrade";
 import { ScoreBadge, scoreTone } from "./ScoreBadge";
 
 interface RepoCardProps {
@@ -38,6 +39,10 @@ export function RepoCard({ repo }: RepoCardProps) {
         <ArrowRight aria-hidden="true" className="shrink-0 text-outline transition-transform duration-300 group-hover:translate-x-1 group-hover:text-primary" size={18} />
       </div>
 
+      <div className="mb-md border-t border-structure/50 pt-md">
+        <RepoHealthGrade health={repo.health} />
+      </div>
+
       <div className="flex items-end justify-between gap-md border-t border-structure/50 pt-md">
         <div>
           <p className="label-caps mb-sm">LAST REVIEW</p>
@@ -51,4 +56,3 @@ export function RepoCard({ repo }: RepoCardProps) {
     </Link>
   );
 }
-

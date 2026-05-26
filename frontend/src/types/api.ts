@@ -1,4 +1,14 @@
 export type ReviewSeverity = "critical" | "warning" | "suggestion";
+export type HealthGrade = "A" | "B" | "C" | "D" | "F";
+export type HealthTrend = "up" | "down" | "stable";
+
+export interface RepositoryHealth {
+  grade: HealthGrade;
+  average: number;
+  trend: HealthTrend;
+  reviewCount: number;
+  lastReviewedAt: string | null;
+}
 
 export interface Repository {
   id?: string;
@@ -7,6 +17,10 @@ export interface Repository {
   webhookId?: number;
   ownerId?: string;
   createdAt: string;
+}
+
+export interface RepositoryWithHealth extends Repository {
+  health: RepositoryHealth;
 }
 
 export interface ReviewComment {
@@ -31,7 +45,7 @@ export interface Review {
   createdAt: string;
 }
 
-export interface DashboardRepository extends Repository {
+export interface DashboardRepository extends RepositoryWithHealth {
   lastReviewScore: number | null;
   totalReviews: number;
 }

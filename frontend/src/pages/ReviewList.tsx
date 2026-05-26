@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 
-import { fetchReviews } from "../api/client";
+import { fetchRepositoryHealth, fetchReviews } from "../api/client";
 import { PageHeader } from "../components/PageHeader";
+import { RepoHealthGrade } from "../components/RepoHealthGrade";
 import { ReviewPreviewCard } from "../components/ReviewPreviewCard";
 import { StatusPanel } from "../components/StatusPanel";
 import { usePageTitle } from "../hooks/usePageTitle";
-import type { Review } from "../types/api";
+import type { RepositoryHealth, Review } from "../types/api";
 import { reviewIdentifier } from "../types/api";
 import { requestErrorMessage } from "../utils";
 
@@ -20,6 +21,7 @@ export function ReviewList() {
   const state = location.state as ReviewListLocationState | null;
   const numericRepoId = Number(repoId);
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [health, setHealth] = useState<RepositoryHealth | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const repositoryName = state?.repoFullName ?? reviews[0]?.repoFullName ?? `Repository ${repoId}`;
@@ -35,7 +37,11 @@ export function ReviewList() {
 
     const loadReviews = async () => {
       try {
-        const response = await fetchReviews(numericRepoId);
+        const [response, repositoryHealth] = await Promise.all([
+          fetchReviews(numericRepoId),
+          fetchRepositoryHealth(numericRepoId),
+        ]);
+        setHealth(repositoryHealth);
         setReviews(
           [...response].sort(
             (left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt),
@@ -54,6 +60,7 @@ export function ReviewList() {
   return (
     <>
       <PageHeader
+        action={health ? <RepoHealthGrade compact health={health} /> : undefined}
         description="Pull request analyses completed by Prism for this repository."
         eyebrow="REVIEW HISTORY"
         title={repositoryName}

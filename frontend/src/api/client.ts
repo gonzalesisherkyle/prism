@@ -1,7 +1,13 @@
 import axios from "axios";
 
 import { authStorageKey, clearStoredToken } from "../auth/storage";
-import type { Repository, Review, SearchResult } from "../types/api";
+import type {
+  Repository,
+  RepositoryHealth,
+  RepositoryWithHealth,
+  Review,
+  SearchResult,
+} from "../types/api";
 
 const apiBaseUrl = import.meta.env.VITE_API_URL ?? "http://localhost:4000";
 
@@ -56,8 +62,10 @@ function unpackRecord<T>(payload: T | { repo?: T; review?: T }): T {
   return payload as T;
 }
 
-export async function fetchRepositories(): Promise<Repository[]> {
-  const response = await apiClient.get<Repository[] | { repos: Repository[] }>("/repos");
+export async function fetchRepositories(): Promise<RepositoryWithHealth[]> {
+  const response = await apiClient.get<
+    RepositoryWithHealth[] | { repos: RepositoryWithHealth[] }
+  >("/repos");
 
   return unpackCollection(response.data);
 }
@@ -76,6 +84,14 @@ export async function fetchReviews(repoId: number): Promise<Review[]> {
   });
 
   return unpackCollection(response.data);
+}
+
+export async function fetchRepositoryHealth(repoId: number): Promise<RepositoryHealth> {
+  const response = await apiClient.get<RepositoryHealth>(
+    `/repos/${encodeURIComponent(repoId)}/health`,
+  );
+
+  return response.data;
 }
 
 export async function fetchReview(reviewId: string): Promise<Review> {

@@ -1,5 +1,5 @@
 import { Plus, X } from "lucide-react";
-import { type FormEvent, useCallback, useEffect, useState } from "react";
+import { type FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 
 import {
@@ -7,6 +7,7 @@ import {
   fetchReviews,
   registerRepository,
 } from "../api/client";
+import { HealthSummaryBar } from "../components/HealthSummaryBar";
 import { PageHeader } from "../components/PageHeader";
 import { RepoCard } from "../components/RepoCard";
 import { ReviewSearchBar } from "../components/ReviewSearchBar";
@@ -14,7 +15,7 @@ import { SearchResults } from "../components/SearchResults";
 import { StatusPanel } from "../components/StatusPanel";
 import { usePageTitle } from "../hooks/usePageTitle";
 import { useReviewSearch } from "../hooks/useReviewSearch";
-import type { DashboardRepository, Repository } from "../types/api";
+import type { DashboardRepository, HealthGrade, RepositoryWithHealth } from "../types/api";
 import { requestErrorMessage } from "../utils";
 
 function latestScore(reviews: Awaited<ReturnType<typeof fetchReviews>>): number | null {
@@ -38,6 +39,7 @@ export function Dashboard() {
   const [formOpen, setFormOpen] = useState(false);
   const [repoFullName, setRepoFullName] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [gradeFilter, setGradeFilter] = useState<HealthGrade | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const search = useReviewSearch(searchQuery);
 
@@ -50,7 +52,7 @@ export function Dashboard() {
     try {
       const registeredRepos = await fetchRepositories();
       const enhancedRepos = await Promise.all(
-        registeredRepos.map(async (repo: Repository) => {
+        registeredRepos.map(async (repo: RepositoryWithHealth) => {
           try {
             const reviews = await fetchReviews(repo.repoId);
 
@@ -80,6 +82,27 @@ export function Dashboard() {
   useEffect(() => {
     void loadRepos();
   }, [loadRepos]);
+
+  useEffect(() => {
+    if (
+      gradeFilter &&
+      !repos.some(
+        (repo) => repo.health.reviewCount >= 3 && repo.health.grade === gradeFilter,
+      )
+    ) {
+      setGradeFilter(null);
+    }
+  }, [gradeFilter, repos]);
+
+  const filteredRepos = useMemo(
+    () =>
+      gradeFilter
+        ? repos.filter(
+            (repo) => repo.health.reviewCount >= 3 && repo.health.grade === gradeFilter,
+          )
+        : repos,
+    [gradeFilter, repos],
+  );
 
   const handleRegister = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -130,6 +153,14 @@ export function Dashboard() {
         />
       )}
 
+      {!isReposView && !search.hasQuery && !loading && !error && repos.length > 0 && (
+        <HealthSummaryBar
+          onSelectGrade={setGradeFilter}
+          repos={repos}
+          selectedGrade={gradeFilter}
+        />
+      )}
+
       {formOpen && (
         <form className="panel mb-xl flex flex-col gap-md p-lg sm:flex-row border-primary/30 shadow-lg shadow-primary/5 relative overflow-hidden transition-all duration-500" onSubmit={handleRegister}>
           <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary via-primary-container to-transparent" />
@@ -166,9 +197,11 @@ export function Dashboard() {
           label="NO REPOSITORIES"
           message="Register a GitHub repository to begin automated pull request reviews."
         />
+      ) : filteredRepos.length === 0 ? (
+        <StatusPanel label="NO MATCHING HEALTH GRADE" message="No repositories match the selected health grade." />
       ) : (
         <section aria-label="Registered repositories" className="mt-lg grid grid-cols-12 gap-md">
-          {repos.map((repo) => (
+          {filteredRepos.map((repo) => (
             <RepoCard key={repo.repoId} repo={repo} />
           ))}
         </section>
