@@ -33,11 +33,13 @@ export function ReviewSearchBar({ value, onChange, loading, children }: ReviewSe
               value={value}
             />
             {loading && (
-              <LoaderCircle
+              <span
                 aria-label="Searching"
-                className="absolute right-md top-1/2 -translate-y-1/2 animate-spin text-primary"
-                size={17}
-              />
+                className="pointer-events-none absolute right-md top-1/2 flex -translate-y-1/2 items-center justify-center text-primary"
+                role="status"
+              >
+                <LoaderCircle aria-hidden="true" className="animate-spin" size={17} />
+              </span>
             )}
           </span>
         </label>
